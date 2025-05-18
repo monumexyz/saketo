@@ -1,5 +1,4 @@
 import 'package:saketo/rust_ffi/rust_ffi.dart';
-
 import '../mnemonic_type.dart';
 
 class PolyseedMnemonicType implements MnemonicType {

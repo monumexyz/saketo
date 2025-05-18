@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/main_wallet_page.dart';
 
@@ -34,7 +33,8 @@ class _EnterPasswordPageState extends State<EnterPasswordPage> {
                   height: 16,
                 ),
                 Text(
-                  AppLocalizations.of(context)!.enterPasswordOf(widget.theWallet.name),
+                  AppLocalizations.of(context)!
+                      .enterPasswordOf(widget.theWallet.name),
                   style: TextStyle(
                     fontSize: 16,
                     color: Theme.of(context).colorScheme.tertiary,
@@ -92,8 +92,8 @@ class _EnterPasswordPageState extends State<EnterPasswordPage> {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.all(12),
-                                hintText:
-                                    AppLocalizations.of(context)!.enterThePassword,
+                                hintText: AppLocalizations.of(context)!
+                                    .enterThePassword,
                                 hintStyle: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context).colorScheme.surface,
@@ -123,27 +123,20 @@ class _EnterPasswordPageState extends State<EnterPasswordPage> {
                       Expanded(
                           child: ElevatedButton(
                               onPressed: () async {
-                                if (password.isEmpty) {
+                                final mnemonic = await widget.theWallet
+                                    .getMnemonic(password);
+                                if (mnemonic == null || mnemonic == "") {
+                                  if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           duration: const Duration(seconds: 2),
                                           content: Text(
                                               AppLocalizations.of(context)!
-                                                  .passwordEmptyWarning)));
+                                                  .wrongPassword)));
                                 } else {
-                                  final mnemonic = await widget.theWallet.getMnemonic(password);
-                                  if (mnemonic == null || mnemonic == "") {
-                                    if (!context.mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            duration: const Duration(seconds: 2),
-                                            content: Text(
-                                                AppLocalizations.of(context)!
-                                                    .wrongPassword)));
-                                  } else {
-                                    if (!context.mounted) return;
-                                    context.go(MainWalletPage.routeName, extra: widget.theWallet);
-                                  }
+                                  if (!context.mounted) return;
+                                  context.go(MainWalletPage.routeName,
+                                      extra: widget.theWallet);
                                 }
                               },
                               style: ElevatedButton.styleFrom(

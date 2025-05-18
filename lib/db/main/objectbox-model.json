@@ -4,36 +4,105 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:8423644325719568647",
-      "lastPropertyId": "5:8877733737431457110",
-      "name": "Wallet",
+      "id": "1:7858467223581018166",
+      "lastPropertyId": "8:223245764617604805",
+      "name": "Node",
       "properties": [
         {
-          "id": "1:6905215426760625050",
+          "id": "1:890342079878058252",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:6594600134903027098",
+          "id": "2:1703742212777328846",
           "name": "internalId",
           "type": 9
         },
         {
-          "id": "3:7437489195476879074",
+          "id": "3:6680925698532093457",
           "name": "name",
           "type": 9
         },
         {
-          "id": "4:3729453898432994263",
+          "id": "4:7012174447902305723",
+          "name": "url",
+          "type": 9
+        },
+        {
+          "id": "5:2861977194192907744",
+          "name": "port",
+          "type": 6
+        },
+        {
+          "id": "6:1550369106448554161",
+          "name": "isSecure",
+          "type": 1
+        },
+        {
+          "id": "7:1776235673771951020",
+          "name": "isTor",
+          "type": 1
+        },
+        {
+          "id": "8:223245764617604805",
+          "name": "isActive",
+          "type": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:5546582940303745119",
+      "lastPropertyId": "8:5281670410722512203",
+      "name": "Wallet",
+      "properties": [
+        {
+          "id": "1:3182874891765635063",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8973595793829083423",
+          "name": "internalId",
+          "type": 9
+        },
+        {
+          "id": "3:1388800300453822484",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:9206153584376557666",
           "name": "modeName",
           "type": 9
+        },
+        {
+          "id": "5:2092794428918712591",
+          "name": "mnemonicTypeName",
+          "type": 9
+        },
+        {
+          "id": "6:2391441955330784795",
+          "name": "primaryAddress",
+          "type": 9
+        },
+        {
+          "id": "7:6812396206550926841",
+          "name": "birthdayHeight",
+          "type": 6
+        },
+        {
+          "id": "8:5281670410722512203",
+          "name": "lastSyncedHeight",
+          "type": 6
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:8423644325719568647",
+  "lastEntityId": "2:5546582940303745119",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
@@ -41,9 +110,7 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [
-    8877733737431457110
-  ],
+  "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1
 }

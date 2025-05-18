@@ -2,12 +2,16 @@ use aes_gcm::aead::Aead;
 use aes_gcm::{AeadCore, Aes256Gcm, Key, KeyInit, Nonce};
 use argon2::Argon2;
 use base64::Engine;
+use curve25519_dalek::Scalar;
 use polyseed::{self};
 use monero_seed;
 use rand::RngCore;
+use zeroize::Zeroizing;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use rand::rngs::OsRng;
+use monero_serai::primitives::keccak256;
+use monero_wallet::address::{AddressType, Network};
 
 // --------------------------------
 // TYPES AND OTHERS
@@ -35,6 +39,14 @@ fn c_str_to_string(c_str: *const c_char) -> String {
         CStr::from_ptr(c_str)
     };
     c_str.to_str().unwrap_or("").to_string()
+}
+
+#[no_mangle]
+pub extern "C" fn get_block_height_from_unix_time(unix_time: i64) -> i64 {
+    let time_diff = unix_time.saturating_sub(1635724948); // This number corresponds to Polyseed's earliest possible birthday
+    let early_day_seconds = time_diff / 730; // A day earlier for every two years for safety
+    let block_height = time_diff.saturating_sub(early_day_seconds) / 120;
+    (2483380 + block_height).try_into().unwrap() // This number corresponds to Monero's block height at Polyseed's earliest possible birthday
 }
 
 // --------------------------------
@@ -137,6 +149,25 @@ extern "C" fn is_valid_polyseed_mnemonic(mnemonic: *const c_char, language_code:
     ResultWithMessage::new(seed.is_ok(), message)
 }
 
+#[no_mangle]
+pub extern "C" fn get_primary_address_polyseed(mnemonic: *const c_char) -> *mut c_char {
+    let mnemonic = unsafe { CStr::from_ptr(mnemonic) }.to_str().unwrap_or("").to_string();
+    let seed = polyseed::Polyseed::from_string(polyseed::Language::English, Zeroizing::new(mnemonic)).unwrap();
+    let priv_spend = Scalar::from_bytes_mod_order(*seed.key()).to_bytes();
+    let priv_view = keccak256(priv_spend);
+    let pub_spend = Scalar::from_bytes_mod_order(priv_spend) * curve25519_dalek::constants::ED25519_BASEPOINT_POINT;
+    let pub_view = Scalar::from_bytes_mod_order(priv_view) * curve25519_dalek::constants::ED25519_BASEPOINT_POINT;
+    let address = monero_wallet::address::MoneroAddress::new(Network::Mainnet, AddressType::Legacy, pub_spend, pub_view);
+    CString::new(address.to_string()).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern "C" fn get_block_height_polyseed(mnemonic: *const c_char) -> i64 {
+    let mnemonic = unsafe { CStr::from_ptr(mnemonic) }.to_str().unwrap_or("").to_string();
+    let seed = polyseed::Polyseed::from_string(polyseed::Language::English, Zeroizing::new(mnemonic)).unwrap();
+    get_block_height_from_unix_time(seed.birthday().try_into().unwrap())
+}
+
 // --------------------------------
 // LEGACY
 // --------------------------------
@@ -177,6 +208,18 @@ extern "C" fn is_valid_legacy_mnemonic(mnemonic: *const c_char, language_code: *
         }
     };
     ResultWithMessage::new(seed.is_ok(), message) 
+}
+
+#[no_mangle]
+pub extern "C" fn get_primary_address_monero_seed(mnemonic: *const c_char) -> *mut c_char {
+    let mnemonic = unsafe { CStr::from_ptr(mnemonic) }.to_str().unwrap_or("").to_string();
+    let seed = monero_seed::Seed::from_string(monero_seed::Language::English, Zeroizing::new(mnemonic)).unwrap();
+    let priv_spend = Scalar::from_bytes_mod_order(*seed.entropy()).to_bytes();
+    let priv_view = keccak256(priv_spend);
+    let pub_spend = Scalar::from_bytes_mod_order(priv_spend) * curve25519_dalek::constants::ED25519_BASEPOINT_POINT;
+    let pub_view = Scalar::from_bytes_mod_order(priv_view) * curve25519_dalek::constants::ED25519_BASEPOINT_POINT;
+    let address = monero_wallet::address::MoneroAddress::new(Network::Mainnet, AddressType::Legacy, pub_spend, pub_view);
+    CString::new(address.to_string()).unwrap().into_raw()
 }
 
 // --------------------------------

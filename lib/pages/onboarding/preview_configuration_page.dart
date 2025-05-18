@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/onboarding/create_password_page.dart';
+import 'package:saketo/wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
 import 'package:saketo/wallet/wallet_modes/basic/basic_mode.dart';
 
-import '../../wallet/mnemonics/types/mnemonic_type.dart';
+import '../../wallet/mnemonics/mnemonic_type.dart';
 import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
 
 class PreviewConfigurationPage extends StatefulWidget {
@@ -22,13 +24,14 @@ class PreviewConfigurationPage extends StatefulWidget {
 
 class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
   String _walletNameString = 'My Main Wallet';
+  int _birthdayHeight = 0;
   MnemonicType? _chosenMnemonicType;
 
   @override
   Widget build(BuildContext context) {
     WalletMode walletMode = widget.extra['walletMode'] as WalletMode;
-    if (walletMode is BasicMode) {
-      // Polyseed is chosen automatically for basic mode
+    if (walletMode is BasicMode && (widget.extra['isCreateWallet'] as bool)) {
+      // Polyseed is chosen automatically for basic mode wallet creation
       _chosenMnemonicType = MnemonicType.polyseed();
     }
     return SafeArea(
@@ -151,7 +154,8 @@ class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
                                   width: double.infinity,
                                   child: Text(
                                     _walletNameString == ''
-                                        ? AppLocalizations.of(context)!.walletNameHint
+                                        ? AppLocalizations.of(context)!
+                                            .walletNameHint
                                         : _walletNameString,
                                     style: TextStyle(
                                       fontSize: 14,
@@ -245,7 +249,8 @@ class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
                               ),
                             ),
                             child: TextField(
-                              onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                              onTapOutside: (event) =>
+                                  FocusScope.of(context).unfocus(),
                               onChanged: (value) {
                                 setState(() {
                                   _walletNameString = value;
@@ -260,7 +265,8 @@ class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.all(12),
-                                hintText: AppLocalizations.of(context)!.walletNameHint,
+                                hintText: AppLocalizations.of(context)!
+                                    .walletNameHint,
                                 hintStyle: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context).colorScheme.surface,
@@ -271,77 +277,197 @@ class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
                         ],
                       ),
                     ),
+                    !(walletMode is BasicMode &&
+                        (widget.extra['isCreateWallet'] as bool))
+                        ? const SizedBox(
+                      height: 16,
+                    ) : const SizedBox(),
+                    !(walletMode is BasicMode &&
+                            (widget.extra['isCreateWallet'] as bool))
+                        ? Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.mnemonicType,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                                Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Theme.of(context).colorScheme.scrim,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: DropdownMenu(
+                                      menuStyle: MenuStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .scrim),
+                                      ),
+                                        onSelected: (mnemonic) {
+                                          setState(() {
+                                            _chosenMnemonicType = mnemonic!;
+                                          });
+                                        },
+                                        textStyle: TextStyle(
+                                          fontSize: 14,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .tertiary,
+                                        ),
+                                        inputDecorationTheme:
+                                            InputDecorationTheme(
+                                          border: InputBorder.none,
+                                          contentPadding:
+                                              const EdgeInsets.all(12),
+                                          hintStyle: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surface,
+                                          ),
+                                        ),
+                                        trailingIcon: SvgPicture.asset(
+                                          'app_assets/chevron_down.svg',
+                                          colorFilter: ColorFilter.mode(
+                                              Theme.of(context)
+                                                  .colorScheme
+                                                  .surface,
+                                              BlendMode.srcIn),
+                                        ),
+                                        selectedTrailingIcon: SvgPicture.asset(
+                                          'app_assets/chevron_up.svg',
+                                          colorFilter: ColorFilter.mode(
+                                              Theme.of(context)
+                                                  .colorScheme
+                                                  .surface,
+                                              BlendMode.srcIn),
+                                        ),
+                                        width: double.infinity,
+                                        hintText: AppLocalizations.of(context)!
+                                            .selectMnemonicType,
+                                        dropdownMenuEntries: <DropdownMenuEntry<
+                                            MnemonicType>>[
+                                          DropdownMenuEntry(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .scrim),
+                                              foregroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .tertiary),
+                                            ),
+                                              value: MnemonicType.polyseed(),
+                                              label:
+                                                  '${MnemonicType.polyseed().name} (${MnemonicType.polyseed().wordCount} ${AppLocalizations.of(context)!.words})'),
+                                          DropdownMenuEntry(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .scrim),
+                                              foregroundColor:
+                                                  WidgetStateProperty.all(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .tertiary),
+                                            ),
+                                              value: MnemonicType.legacy(),
+                                              label:
+                                                  '${MnemonicType.legacy().name} (${MnemonicType.legacy().wordCount} ${AppLocalizations.of(context)!.words})'),
+                                          // DropdownMenuEntry(value: MnemonicType.mymonero(), label: '${MnemonicType.mymonero().name} (${MnemonicType.mymonero().wordCount} ${AppLocalizations.of(context)!.words})'),
+                                          // TODO: MyMonero to be added when it's ready for use in monero-wallet-util
+                                        ])),
+                              ],
+                            ))
+                        : const SizedBox(),
                     const SizedBox(
                       height: 16,
                     ),
-                    walletMode is! BasicMode
-                        ? Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.mnemonicType,
+                    _chosenMnemonicType is! PolyseedMnemonicType && !(widget.extra['isCreateWallet'] as bool) ? Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.blockHeight,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.scrim,
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                            child: TextField(
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(8)
+                              ],
+                              onTapOutside: (event) =>
+                                  FocusScope.of(context).unfocus(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _birthdayHeight = int.parse(value);
+                                });
+                              },
+                              cursorColor:
+                              Theme.of(context).colorScheme.tertiary,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.tertiary,
                               ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.scrim,
-                                borderRadius: BorderRadius.circular(5),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.all(12),
+                                hintText: AppLocalizations.of(context)!
+                                    .blockHeightHint,
+                                hintStyle: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.surface,
+                                ),
                               ),
-                              child: DropdownMenu(
-                                onSelected: (mnemonic) {
-                                  setState(() {
-                                    _chosenMnemonicType = mnemonic!;
-                                  });
-                                },
-                                  textStyle: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.tertiary,
-                                  ),
-                                  inputDecorationTheme: InputDecorationTheme(
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.all(12),
-                                    hintStyle: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.surface,
-                                    ),
-                                  ),
-                                  trailingIcon: SvgPicture.asset(
-                                    'app_assets/chevron_down.svg',
-                                    colorFilter: ColorFilter.mode(
-                                        Theme.of(context).colorScheme.surface,
-                                        BlendMode.srcIn),
-                                  ),
-                                  selectedTrailingIcon: SvgPicture.asset(
-                                    'app_assets/chevron_up.svg',
-                                    colorFilter: ColorFilter.mode(
-                                        Theme.of(context).colorScheme.surface,
-                                        BlendMode.srcIn),
-                                  ),
-                                  width: double.infinity,
-                                  hintText: AppLocalizations.of(context)!.selectMnemonicType,
-                                  dropdownMenuEntries: <DropdownMenuEntry<MnemonicType>>[
-                                    DropdownMenuEntry(value: MnemonicType.polyseed(), label: '${MnemonicType.polyseed().name} (${MnemonicType.polyseed().wordCount} ${AppLocalizations.of(context)!.words})'),
-                                    DropdownMenuEntry(value: MnemonicType.legacy(), label: '${MnemonicType.legacy().name} (${MnemonicType.legacy().wordCount} ${AppLocalizations.of(context)!.words})'),
-                                    // DropdownMenuEntry(value: MnemonicType.mymonero(), label: '${MnemonicType.mymonero().name} (${MnemonicType.mymonero().wordCount} ${AppLocalizations.of(context)!.words})'),
-                                    // TODO: MyMonero to be added when it's ready for use in monero-wallet-util
-                                  ])
                             ),
-                          ],
-                        )) : const SizedBox(),
+                          ),
+                        ],
+                      ),
+                    ) : const SizedBox(),
                   ],
                 )),
                 const SizedBox(
@@ -374,20 +500,21 @@ class _PreviewConfigurationPageState extends State<PreviewConfigurationPage> {
                           child: ElevatedButton(
                               onPressed: () {
                                 if (_chosenMnemonicType == null) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                      duration:
-                                      const Duration(seconds: 2),
-                                      content: Text(
-                                          AppLocalizations.of(context)!
-                                              .chooseAMnemonicType)));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          duration: const Duration(seconds: 2),
+                                          content: Text(
+                                              AppLocalizations.of(context)!
+                                                  .chooseAMnemonicType)));
                                 } else {
                                   widget.extra.addAll({
                                     'walletName': _walletNameString,
                                     'mnemonicType': _chosenMnemonicType!,
                                     'isPINConfirmation': false,
+                                    'birthdayHeight': _birthdayHeight
                                   });
-                                  context.push(CreatePasswordPage.routeName, extra: widget.extra);
+                                  context.push(CreatePasswordPage.routeName,
+                                      extra: widget.extra);
                                 }
                               },
                               style: ElevatedButton.styleFrom(

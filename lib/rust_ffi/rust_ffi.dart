@@ -1,16 +1,16 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
-import 'package:saketo/wallet/mnemonics/types/legacy/legacy_mnemonic_type.dart';
-import 'package:saketo/wallet/mnemonics/types/polyseed/polyseed_mnemonic_type.dart';
 
-import '../wallet/mnemonics/types/mnemonic_type.dart';
+import '../wallet/mnemonics/legacy/legacy_mnemonic_type.dart';
+import '../wallet/mnemonics/mnemonic_type.dart';
+import '../wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
 
 final DynamicLibrary rustLib = Platform.isAndroid
-    ? DynamicLibrary.open("libsaketo_rust.so")
+    ? DynamicLibrary.open("libsaketo.so")
     : (Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open("libsaketo_rust.dylib"));
+        : DynamicLibrary.open("libsaketo.dylib"));
 
 final Pointer<Utf8> Function() _generatePolyseedMnemonic = rustLib
     .lookup<NativeFunction<Pointer<Utf8> Function()>>(
@@ -57,12 +57,29 @@ final ResultWithMessage Function(Pointer<Utf8>, Pointer<Utf8>)
                     Pointer<Utf8>)>>("is_valid_legacy_mnemonic")
         .asFunction();
 
-final void Function(Pointer<Utf8>) _freeCString = rustLib
-    .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>("free_c_string")
+final Pointer<Utf8> Function(Pointer<Utf8>)
+    _getPrimaryAddressLegacy = rustLib
+        .lookup<NativeFunction<Pointer<Utf8> Function(Pointer<Utf8>)>>(
+            "get_primary_address_monero_seed")
+        .asFunction();
+
+final Pointer<Utf8> Function(Pointer<Utf8>)
+    _getPrimaryAddressPolyseed = rustLib
+        .lookup<NativeFunction<Pointer<Utf8> Function(Pointer<Utf8>)>>(
+            "get_primary_address_polyseed")
+        .asFunction();
+
+final int Function(Pointer<Utf8>) _getBlockHeightPolyseed = rustLib
+    .lookup<NativeFunction<Int64 Function(Pointer<Utf8>)>>(
+        "get_block_height_polyseed")
     .asFunction();
 
-final void Function(Pointer<Bool>) _freeBool = rustLib
-    .lookup<NativeFunction<Void Function(Pointer<Bool>)>>('free_bool')
+final int Function(int) _getBlockHeightFromUnixTime = rustLib
+    .lookup<NativeFunction<Int64 Function(Int64)>>("get_block_height_from_unix_time")
+    .asFunction<int Function(int)>();
+
+final void Function(Pointer<Utf8>) _freeCString = rustLib
+    .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>("free_c_string")
     .asFunction();
 
 String generateSeedString(MnemonicType mnemonicType) {
@@ -121,4 +138,32 @@ String decryptData(String data, String password) {
   final String message = result.message.toDartString();
   _freeCString(result.message);
   return (success, message);
+}
+
+String getPrimaryAddress(String mnemonic, MnemonicType mnemonicType) {
+  final Pointer<Utf8> mnemonicPointer = mnemonic.toNativeUtf8();
+  late final Pointer<Utf8> primaryAddressPointer;
+  switch (mnemonicType) {
+    case PolyseedMnemonicType():
+      primaryAddressPointer = _getPrimaryAddressPolyseed(mnemonicPointer);
+    case LegacyMnemonicType():
+      primaryAddressPointer = _getPrimaryAddressLegacy(mnemonicPointer);
+    default:
+      primaryAddressPointer = _getPrimaryAddressPolyseed(mnemonicPointer);
+  }
+  final String primaryAddress = primaryAddressPointer.toDartString();
+  _freeCString(mnemonicPointer);
+  _freeCString(primaryAddressPointer);
+  return primaryAddress;
+}
+
+int getBlockHeightFromUnixTime(int unixTime) {
+  return _getBlockHeightFromUnixTime(unixTime);
+}
+
+int getBlockHeightPolyseed(String mnemonic) {
+  final Pointer<Utf8> mnemonicPointer = mnemonic.toNativeUtf8();
+  final int blockHeight = _getBlockHeightPolyseed(mnemonicPointer);
+  _freeCString(mnemonicPointer);
+  return blockHeight;
 }

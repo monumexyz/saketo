@@ -1,16 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:saketo/routes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:saketo/services/sync_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/v4.dart';
 import 'db/main/objectbox.dart';
+import 'nodes/node.dart';
 
+// Use this variable to access the database at any time in the app
 late ObjectBox objectbox;
+
+Future<void> addDefaultNodes() async {
+  final hasNodes = (await SharedPreferences.getInstance()).getBool('has_nodes');
+  if (hasNodes == null || !hasNodes) {
+    final defaultNodes = [
+      Node(const UuidV4().generate(), 'Stack Wallet Node', 'monero.stackwallet.com', 18081, true, false, true)
+    ];
+    for (final node in defaultNodes) {
+      objectbox.store.box<Node>().put(node);
+    }
+    (await SharedPreferences.getInstance()).setBool('has_nodes', true);
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   objectbox = await ObjectBox.create();
-  runApp(const Saketo());
+  await addDefaultNodes();
+  runApp(ChangeNotifierProvider(
+    create: (context) => SyncService(),
+    child: const Saketo(),
+  ));
 }
 
 class Saketo extends StatelessWidget {

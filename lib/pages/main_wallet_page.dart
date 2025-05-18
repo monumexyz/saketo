@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:saketo/db/secure/secure_db.dart';
+import 'package:provider/provider.dart';
+import 'package:saketo/nodes/node.dart';
 import 'package:saketo/pages/receive/main_recive_page.dart';
 import 'package:saketo/pages/settings/main_settings_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../services/sync_service.dart';
 import '../wallet/wallet.dart';
 import '../wallet/wallet_modes/wallet_mode_abstract.dart';
+import 'network/main_network_page.dart';
 
 class MainWalletPage extends StatefulWidget {
   final Wallet theWallet;
@@ -20,9 +25,12 @@ class MainWalletPage extends StatefulWidget {
 }
 
 class _MainWalletPageState extends State<MainWalletPage> {
+  late SyncService syncService;
+
   @override
   void initState() {
     super.initState();
+    syncService = Provider.of<SyncService>(context, listen: false);
   }
 
   @override
@@ -48,11 +56,17 @@ class _MainWalletPageState extends State<MainWalletPage> {
                     ),
                     Row(
                       children: [
-                        SvgPicture.asset('app_assets/bar_chart.svg',
-                            colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.surface,
-                                BlendMode.srcIn),
-                            height: 24),
+                        GestureDetector(
+                          onTap: () {
+                            context.push(MainNetworkPage.routeName,
+                                extra: widget.theWallet);
+                          },
+                          child: SvgPicture.asset('app_assets/bar_chart.svg',
+                              colorFilter: ColorFilter.mode(
+                                  Theme.of(context).colorScheme.surface,
+                                  BlendMode.srcIn),
+                              height: 24),
+                        ),
                         const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () {
@@ -152,36 +166,153 @@ class _MainWalletPageState extends State<MainWalletPage> {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(5),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                padding: const EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF468053),
-                            borderRadius: BorderRadius.circular(5),
+                    Expanded(
+                        child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Consumer<SyncService>(
+                                builder: (context, syncService, child) {
+                                  return Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: syncService.syncStatus == 3
+                                          ? const Color(0xFFC14242)
+                                          : syncService.syncStatus == 1
+                                          ? const Color(0xFFD69E5F)
+                                          : syncService.syncStatus == 2
+                                          ? const Color(0xFF468053)
+                                          : const Color(0xFFB9B9B9),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Consumer<SyncService>(
+                                builder: (context, syncService, child) {
+                                  late String syncStatusText;
+                                  switch (syncService.syncStatus) {
+                                    case 1:
+                                      syncStatusText = AppLocalizations.of(context)!
+                                          .syncing;
+                                      break;
+                                    case 2:
+                                      syncStatusText = AppLocalizations.of(context)!
+                                          .synced;
+                                      break;
+                                    case 3:
+                                      SchedulerBinding.instance.addPostFrameCallback((_) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              duration: const Duration(seconds: 5),
+                                                content: Text(
+                                                    AppLocalizations.of(context)!.cantSyncExplanation(syncService.message))));
+                                      });
+                                      syncStatusText = AppLocalizations.of(context)!
+                                          .cantSync;
+                                    case 0:
+                                    default:
+                                      syncStatusText = AppLocalizations.of(context)!
+                                          .notSyncing;
+                                      break;
+                                  }
+                                  return Text(syncStatusText,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.tertiary,
+                                        fontWeight: FontWeight.bold,
+                                      ));
+                                },
+                              )
+                            ],
                           ),
-                        ),
-                        const SizedBox(
-                          width: 12,
-                        ),
-                        Text('Synchronized',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.tertiary,
-                              fontWeight: FontWeight.bold,
-                            ))
-                      ],
-                    ),
+                          Consumer<SyncService>(
+                            builder: (context, syncService, child) {
+                              return Text(
+                                  "${syncService.syncHeight}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.surface,
+                                  ));
+                            },
+                          )
+                        ],
+                      ),
+                    )),
                     const SizedBox(
-                      width: 8,
+                      width: 6,
+                    ),
+                    Consumer<SyncService>(
+                      builder: (context, syncService, child) {
+                        late final String buttonIcon;
+                        switch (syncService.syncStatus) {
+                          case 1:
+                            buttonIcon = 'app_assets/pause.svg';
+                            break;
+                          case 2:
+                            buttonIcon = 'app_assets/pause.svg';
+                            break;
+                          case 3:
+                            buttonIcon = 'app_assets/refresh_cw.svg';
+                            break;
+                          case 0:
+                          default:
+                            buttonIcon = 'app_assets/play.svg';
+                            break;
+                        }
+                        return ElevatedButton(
+                          onPressed: () {
+                            switch (syncService.syncStatus) {
+                              case 1:
+                                syncService.stopSyncing();
+                                break;
+                              case 2:
+                                syncService.stopSyncing();
+                                break;
+                              case 3:
+                                syncService.startSyncing(widget.theWallet, Node.activeNode());
+                                break;
+                              case 0:
+                              default:
+                                syncService.startSyncing(widget.theWallet, Node.activeNode());
+                                break;
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                            padding: const EdgeInsets.all(12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            minimumSize: const Size(48, 48),
+                            maximumSize: const Size(48, 48),
+                          ),
+                          child: SvgPicture.asset(
+                            buttonIcon,
+                            colorFilter: ColorFilter.mode(
+                                Theme.of(context).colorScheme.tertiary,
+                                BlendMode.srcIn),
+                            height: 24,
+                          ),
+                        );
+                      },
                     )
                   ],
                 ),
@@ -214,7 +345,8 @@ class _MainWalletPageState extends State<MainWalletPage> {
                             ),
                           ),
                           onPressed: () {
-                            context.push(MainReceivePage.routeName, extra: widget.theWallet);
+                            context.push(MainReceivePage.routeName,
+                                extra: widget.theWallet);
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -235,7 +367,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Text('Receive',
+                              Text(AppLocalizations.of(context)!.receive,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color:
@@ -248,18 +380,18 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         const SizedBox(width: 6),
                         Expanded(
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .secondary, // Background color
-                                padding: const EdgeInsets.all(
-                                    12), // Padding inside button
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .secondary, // Background color
+                            padding: const EdgeInsets.all(
+                                12), // Padding inside button
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
                                   BorderRadius.circular(5), // Border radius
-                                ),
-                              ),
-                          onPressed: () {  },
+                            ),
+                          ),
+                          onPressed: () {},
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -279,7 +411,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Text('Send',
+                              Text(AppLocalizations.of(context)!.send,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color:

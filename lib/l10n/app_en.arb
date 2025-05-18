@@ -57,5 +57,38 @@
   "enterThePassword": "Enter the password",
   "wrongPassword": "Wrong password.",
   "receive": "Receive",
-  "mainWalletAddress": "Main Wallet Address"
+  "mainWalletAddress": "Main Wallet Address",
+  "errorGeneratingAddress": "Error generating address. Please try again.",
+  "addressCopied": "Address copied to clipboard.",
+  "blockHeight": "Wallet Block Height",
+  "blockHeightHint": "3351961",
+  "syncing": "Syncing",
+  "synced": "Synced",
+  "notSyncing": "Not Syncing",
+  "cantSync": "Can't Sync",
+  "send": "Send",
+  "cantSyncExplanation": "Can't sync: {error}",
+  "@cantSyncExplanation": {
+      "placeholders": {
+        "error": {
+          "type": "String",
+          "example": "No internet"
+        }
+      }
+  },
+  "network": "Network",
+  "activeNode": "Active Node",
+  "manageNodes": "Manage Nodes",
+  "editNode": "Edit Node",
+  "addNode": "Add Node",
+  "needOneNode": "You need at least one node to connect to the network. You can not delete the last node.",
+  "nodeName": "Node Name",
+  "nodeUrl": "Node URL",
+  "nodePort": "Node Port",
+  "nodeNameHint": "My Node",
+  "nodeUrlHint": "monero.mynode.com",
+  "nodePortHint": "18081",
+  "useHttps": "Use HTTPS",
+  "save": "SAVE",
+  "add": "ADD"
 }

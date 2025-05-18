@@ -1,5 +1,5 @@
 [package]
-name = "saketo_rust"
+name = "saketo" # libsaketo
 version = "0.1.0"
 edition = "2021"
 
@@ -9,8 +9,11 @@ crate-type = ["cdylib"]
 [dependencies]
 polyseed = { git = "https://github.com/monumexyz/monero-wallet-util" }
 monero-seed = { git = "https://github.com/monumexyz/monero-wallet-util" }
+monero-wallet = { git = "https://github.com/monumexyz/serai" }
+monero-serai = { git = "https://github.com/monumexyz/serai" }
 rand = "0.8.5"
 zeroize = "1.8.1"
 aes-gcm = "0.10.3"
 argon2 = "0.5.3"
 base64 = "0.22.1"
+curve25519-dalek = "4.1.3"

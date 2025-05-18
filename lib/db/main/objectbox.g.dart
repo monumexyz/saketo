@@ -14,36 +14,106 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import '../../nodes/node.dart';
 import '../../wallet/wallet.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(1, 8423644325719568647),
-      name: 'Wallet',
-      lastPropertyId: const obx_int.IdUid(5, 8877733737431457110),
+      id: const obx_int.IdUid(1, 7858467223581018166),
+      name: 'Node',
+      lastPropertyId: const obx_int.IdUid(8, 223245764617604805),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 6905215426760625050),
+            id: const obx_int.IdUid(1, 890342079878058252),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 6594600134903027098),
+            id: const obx_int.IdUid(2, 1703742212777328846),
             name: 'internalId',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 7437489195476879074),
+            id: const obx_int.IdUid(3, 6680925698532093457),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 3729453898432994263),
+            id: const obx_int.IdUid(4, 7012174447902305723),
+            name: 'url',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 2861977194192907744),
+            name: 'port',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 1550369106448554161),
+            name: 'isSecure',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 1776235673771951020),
+            name: 'isTor',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 223245764617604805),
+            name: 'isActive',
+            type: 1,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(2, 5546582940303745119),
+      name: 'Wallet',
+      lastPropertyId: const obx_int.IdUid(8, 5281670410722512203),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 3182874891765635063),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8973595793829083423),
+            name: 'internalId',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 1388800300453822484),
+            name: 'name',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 9206153584376557666),
             name: 'modeName',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 2092794428918712591),
+            name: 'mnemonicTypeName',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 2391441955330784795),
+            name: 'primaryAddress',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 6812396206550926841),
+            name: 'birthdayHeight',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 5281670410722512203),
+            name: 'lastSyncedHeight',
+            type: 6,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -85,21 +155,69 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(1, 8423644325719568647),
+      lastEntityId: const obx_int.IdUid(2, 5546582940303745119),
       lastIndexId: const obx_int.IdUid(0, 0),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [8877733737431457110],
+      retiredPropertyUids: const [],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    Wallet: obx_int.EntityDefinition<Wallet>(
+    Node: obx_int.EntityDefinition<Node>(
         model: _entities[0],
+        toOneRelations: (Node object) => [],
+        toManyRelations: (Node object) => {},
+        getId: (Node object) => object.id,
+        setId: (Node object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Node object, fb.Builder fbb) {
+          final internalIdOffset = fbb.writeString(object.internalId);
+          final nameOffset = fbb.writeString(object.name);
+          final urlOffset = fbb.writeString(object.url);
+          fbb.startTable(9);
+          fbb.addInt64(0, object.id ?? 0);
+          fbb.addOffset(1, internalIdOffset);
+          fbb.addOffset(2, nameOffset);
+          fbb.addOffset(3, urlOffset);
+          fbb.addInt64(4, object.port);
+          fbb.addBool(5, object.isSecure);
+          fbb.addBool(6, object.isTor);
+          fbb.addBool(7, object.isActive);
+          fbb.finish(fbb.endTable());
+          return object.id ?? 0;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final internalIdParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final nameParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 8, '');
+          final urlParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 10, '');
+          final portParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
+          final isSecureParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
+          final isTorParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false);
+          final isActiveParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
+          final object = Node(internalIdParam, nameParam, urlParam, portParam,
+              isSecureParam, isTorParam, isActiveParam)
+            ..id =
+                const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
+
+          return object;
+        }),
+    Wallet: obx_int.EntityDefinition<Wallet>(
+        model: _entities[1],
         toOneRelations: (Wallet object) => [],
         toManyRelations: (Wallet object) => {},
         getId: (Wallet object) => object.id,
@@ -110,11 +228,18 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final internalIdOffset = fbb.writeString(object.internalId);
           final nameOffset = fbb.writeString(object.name);
           final modeNameOffset = fbb.writeString(object.modeName);
-          fbb.startTable(6);
+          final mnemonicTypeNameOffset =
+              fbb.writeString(object.mnemonicTypeName);
+          final primaryAddressOffset = fbb.writeString(object.primaryAddress);
+          fbb.startTable(9);
           fbb.addInt64(0, object.id ?? 0);
           fbb.addOffset(1, internalIdOffset);
           fbb.addOffset(2, nameOffset);
           fbb.addOffset(3, modeNameOffset);
+          fbb.addOffset(4, mnemonicTypeNameOffset);
+          fbb.addOffset(5, primaryAddressOffset);
+          fbb.addInt64(6, object.birthdayHeight);
+          fbb.addInt64(7, object.lastSyncedHeight);
           fbb.finish(fbb.endTable());
           return object.id ?? 0;
         },
@@ -127,10 +252,24 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGet(buffer, rootOffset, 8, '');
           final modeNameParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 10, '');
+          final mnemonicTypeNameParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 12, '');
+          final primaryAddressParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 14, '');
+          final birthdayHeightParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          final lastSyncedHeightParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
           final object = Wallet(
               internalId: internalIdParam,
               name: nameParam,
-              modeName: modeNameParam)
+              modeName: modeNameParam,
+              mnemonicTypeName: mnemonicTypeNameParam,
+              primaryAddress: primaryAddressParam,
+              birthdayHeight: birthdayHeightParam,
+              lastSyncedHeight: lastSyncedHeightParam)
             ..id =
                 const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
 
@@ -141,21 +280,69 @@ obx_int.ModelDefinition getObjectBoxModel() {
   return obx_int.ModelDefinition(model, bindings);
 }
 
+/// [Node] entity fields to define ObjectBox queries.
+class Node_ {
+  /// See [Node.id].
+  static final id = obx.QueryIntegerProperty<Node>(_entities[0].properties[0]);
+
+  /// See [Node.internalId].
+  static final internalId =
+      obx.QueryStringProperty<Node>(_entities[0].properties[1]);
+
+  /// See [Node.name].
+  static final name = obx.QueryStringProperty<Node>(_entities[0].properties[2]);
+
+  /// See [Node.url].
+  static final url = obx.QueryStringProperty<Node>(_entities[0].properties[3]);
+
+  /// See [Node.port].
+  static final port =
+      obx.QueryIntegerProperty<Node>(_entities[0].properties[4]);
+
+  /// See [Node.isSecure].
+  static final isSecure =
+      obx.QueryBooleanProperty<Node>(_entities[0].properties[5]);
+
+  /// See [Node.isTor].
+  static final isTor =
+      obx.QueryBooleanProperty<Node>(_entities[0].properties[6]);
+
+  /// See [Node.isActive].
+  static final isActive =
+      obx.QueryBooleanProperty<Node>(_entities[0].properties[7]);
+}
+
 /// [Wallet] entity fields to define ObjectBox queries.
 class Wallet_ {
   /// See [Wallet.id].
   static final id =
-      obx.QueryIntegerProperty<Wallet>(_entities[0].properties[0]);
+      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[0]);
 
   /// See [Wallet.internalId].
   static final internalId =
-      obx.QueryStringProperty<Wallet>(_entities[0].properties[1]);
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[1]);
 
   /// See [Wallet.name].
   static final name =
-      obx.QueryStringProperty<Wallet>(_entities[0].properties[2]);
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[2]);
 
   /// See [Wallet.modeName].
   static final modeName =
-      obx.QueryStringProperty<Wallet>(_entities[0].properties[3]);
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[3]);
+
+  /// See [Wallet.mnemonicTypeName].
+  static final mnemonicTypeName =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[4]);
+
+  /// See [Wallet.primaryAddress].
+  static final primaryAddress =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[5]);
+
+  /// See [Wallet.birthdayHeight].
+  static final birthdayHeight =
+      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[6]);
+
+  /// See [Wallet.lastSyncedHeight].
+  static final lastSyncedHeight =
+      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[7]);
 }

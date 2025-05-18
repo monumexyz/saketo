@@ -4,11 +4,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/enter_password_page.dart';
 import 'package:saketo/pages/main_wallet_page.dart';
+import 'package:saketo/wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../main.dart';
-import '../../wallet/mnemonics/types/mnemonic_type.dart';
+import '../../rust_ffi/rust_ffi.dart';
+import '../../wallet/mnemonics/mnemonic_type.dart';
 import '../../wallet/wallet.dart';
 import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
 
@@ -343,10 +345,39 @@ class _MnemonicInputPageState extends State<MnemonicInputPage> {
                                         duration: const Duration(seconds: 2),
                                         content: Text(result.$2)));
                               } else {
+                                late final String primaryAddress;
+                                try {
+                                  primaryAddress = getPrimaryAddress(mnemonicWords.join(" "), chosenMnemonicType);
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          duration: const Duration(seconds: 5),
+                                          content: Text(
+                                              "${AppLocalizations.of(context)!.errorGeneratingAddress} $e")));
+                                  return;
+                                }
+                                if (primaryAddress == "") {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          duration: const Duration(seconds: 2),
+                                          content: Text(
+                                              AppLocalizations.of(context)!.errorGeneratingAddress)));
+                                  return;
+                                }
+                                int birthdayHeight = 0;
+                                if ((widget.extra['mnemonicType'] as MnemonicType) is PolyseedMnemonicType) {
+                                  birthdayHeight = getBlockHeightPolyseed(mnemonicWords.join(" "));
+                                } else {
+                                  birthdayHeight = widget.extra['birthdayHeight'] as int;
+                                }
                                 final wallet = Wallet(
                                   internalId: const Uuid().v4(),
                                   name: widget.extra['walletName'] as String,
                                   modeName: (widget.extra['walletMode'] as WalletMode).name,
+                                  mnemonicTypeName: chosenMnemonicType.name,
+                                  primaryAddress: primaryAddress,
+                                  birthdayHeight: birthdayHeight,
+                                  lastSyncedHeight: birthdayHeight,
                                 );
                                 objectbox.store.box<Wallet>().put(wallet);
                                 final isSaved = await wallet.saveMnemonic(mnemonicWords.join(" "), widget.extra['password'] as String);
