@@ -43,6 +43,4 @@ app.*.map.json
 /android/app/release
 
 # Rust bridge related
-rust/target/
-rust/Cargo.lock
 android/app/src/main/jniLibs/

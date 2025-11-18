@@ -7,10 +7,10 @@ import '../wallet/mnemonics/mnemonic_type.dart';
 import '../wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
 
 final DynamicLibrary rustLib = Platform.isAndroid
-    ? DynamicLibrary.open("libsaketo.so")
+    ? DynamicLibrary.open("libsaketo_ffi.so")
     : (Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open("libsaketo.dylib"));
+        : DynamicLibrary.open("libsaketo_ffi.dylib"));
 
 final Pointer<Utf8> Function() _generatePolyseedMnemonic = rustLib
     .lookup<NativeFunction<Pointer<Utf8> Function()>>(

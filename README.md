@@ -1,24 +1,32 @@
 # Saketo
 
-Saketo is a mobile Monero wallet. It isn't based on any existing wallet and is written from scratch. It is written in Dart and uses the Flutter framework.
+First mobile Monero wallet to use Rust under the hood, built upon [libsaketo](https://github.com/monumexyz/libsaketo)
 
-The first mobile Monero wallet that uses Rust to handle Monero transactions.
+## Building
 
-# Building
+Prerequisites:
+- [Rust and Cargo](https://www.rust-lang.org/tools/install)
+- [Flutter and Dart SDK](https://flutter.dev/docs/get-started/install)
+- [Android Studio](https://developer.android.com/studio)
+- [NDK](https://developer.android.com/ndk/guides)
 
-To build Saketo, you need to have Flutter and Rust installed. You can find instructions on how to install Flutter [here](https://flutter.dev/docs/get-started/install).
-
-1 - Build libsaketo
+Steps:
+1 - Fetch libsaketo
 ```bash
-cd rust && cargo ndk -t arm64-v8a -t armeabi-v7a -o ./../android/app/src/main/jniLibs build --release
+git submodule update --init --recursive
 ```
 
-2 - Generate `.g.dart` files
+2 - Build Rust code for Android
+```bash
+cd libsaketo/ffi && cargo ndk -t arm64-v8a -t armeabi-v7a -o ./../../android/app/src/main/jniLibs build --release
+```
+
+3 - Generate `.g.dart` files
 ```bash
 dart run build_runner build
 ```
 
-3 - Generate localization files
+4 - Generate localization files
 ```bash
 flutter gen-l10n
 ```
