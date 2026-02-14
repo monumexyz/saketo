@@ -1,4 +1,4 @@
-import '../mnemonic_type.dart';
+import 'mnemonic_type.dart';
 
 class MyMoneroMnemonicType implements MnemonicType {
   @override

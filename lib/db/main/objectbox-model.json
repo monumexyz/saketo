@@ -54,7 +54,7 @@
     },
     {
       "id": "2:5546582940303745119",
-      "lastPropertyId": "8:5281670410722512203",
+      "lastPropertyId": "15:4504839794053638220",
       "name": "Wallet",
       "properties": [
         {
@@ -74,16 +74,6 @@
           "type": 9
         },
         {
-          "id": "4:9206153584376557666",
-          "name": "modeName",
-          "type": 9
-        },
-        {
-          "id": "5:2092794428918712591",
-          "name": "mnemonicTypeName",
-          "type": 9
-        },
-        {
           "id": "6:2391441955330784795",
           "name": "primaryAddress",
           "type": 9
@@ -97,6 +87,26 @@
           "id": "8:5281670410722512203",
           "name": "lastSyncedHeight",
           "type": 6
+        },
+        {
+          "id": "9:6894832348075072244",
+          "name": "rawMode",
+          "type": 9
+        },
+        {
+          "id": "10:2999726467836367259",
+          "name": "rawMnemonicType",
+          "type": 9
+        },
+        {
+          "id": "14:6573975902288352708",
+          "name": "rawInputs",
+          "type": 9
+        },
+        {
+          "id": "15:4504839794053638220",
+          "name": "rawOutputs",
+          "type": 9
         }
       ],
       "relations": []
@@ -110,7 +120,13 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    9206153584376557666,
+    2092794428918712591,
+    5007906504932721288,
+    5287223885203537887,
+    3075933742601114031
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

@@ -3,11 +3,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:saketo/pages/onboarding/preview_configuration_page.dart';
-import 'package:saketo/wallet/wallet_modes/advanced/advanced_mode.dart';
-import 'package:saketo/wallet/wallet_modes/basic/basic_mode.dart';
-import 'package:saketo/wallet/wallet_modes/paranoia/paranoia_mode.dart';
 
-import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
+import '../../wallet/modes/advanced_mode.dart';
+import '../../wallet/modes/basic_mode.dart';
+import '../../wallet/modes/paranoia_mode.dart';
+import '../../wallet/modes/wallet_mode_abstract.dart';
 
 class ModeSelectionPage extends StatefulWidget {
   final Map<String, Object> extra;
@@ -368,17 +368,13 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  _selectedMode = WalletMode.paranoia();
-                                });
+                                // TODO: Handle when paranoia mode is implemented
                               },
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                    color: _selectedMode is ParanoiaMode
-                                        ? Theme.of(context).colorScheme.secondary
-                                        : Theme.of(context).colorScheme.scrim,
+                                    color: Theme.of(context).colorScheme.shadow,
                                     borderRadius: BorderRadius.circular(5)),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -415,6 +411,31 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                                                             .colorScheme
                                                             .surface,
                                                         BlendMode.srcIn),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  width: 12,
+                                                ),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .shadow,
+                                                      borderRadius:
+                                                      BorderRadius.circular(5)),
+                                                  height: 40,
+                                                  width: 60,
+                                                  child: Center(
+                                                    child: Text(
+                                                      AppLocalizations.of(context)!
+                                                          .soon,
+                                                      style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .surface,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                                 const SizedBox(
@@ -459,9 +480,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                                       width: 24,
                                       height: 24,
                                       decoration: BoxDecoration(
-                                        color: _selectedMode is ParanoiaMode
-                                            ? Theme.of(context).colorScheme.secondary
-                                            : Theme.of(context).colorScheme.scrim,
+                                        color: Theme.of(context).colorScheme.shadow,
                                         border: Border.all(
                                           color:
                                           Theme.of(context).colorScheme.tertiary,

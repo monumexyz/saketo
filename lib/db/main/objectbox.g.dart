@@ -72,7 +72,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 5546582940303745119),
       name: 'Wallet',
-      lastPropertyId: const obx_int.IdUid(8, 5281670410722512203),
+      lastPropertyId: const obx_int.IdUid(15, 4504839794053638220),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -91,16 +91,6 @@ final _entities = <obx_int.ModelEntity>[
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 9206153584376557666),
-            name: 'modeName',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2092794428918712591),
-            name: 'mnemonicTypeName',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
             id: const obx_int.IdUid(6, 2391441955330784795),
             name: 'primaryAddress',
             type: 9,
@@ -114,6 +104,26 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(8, 5281670410722512203),
             name: 'lastSyncedHeight',
             type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 6894832348075072244),
+            name: 'rawMode',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 2999726467836367259),
+            name: 'rawMnemonicType',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 6573975902288352708),
+            name: 'rawInputs',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(15, 4504839794053638220),
+            name: 'rawOutputs',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -161,7 +171,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [
+        9206153584376557666,
+        2092794428918712591,
+        5007906504932721288,
+        5287223885203537887,
+        3075933742601114031
+      ],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -227,34 +243,34 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectToFB: (Wallet object, fb.Builder fbb) {
           final internalIdOffset = fbb.writeString(object.internalId);
           final nameOffset = fbb.writeString(object.name);
-          final modeNameOffset = fbb.writeString(object.modeName);
-          final mnemonicTypeNameOffset =
-              fbb.writeString(object.mnemonicTypeName);
           final primaryAddressOffset = fbb.writeString(object.primaryAddress);
-          fbb.startTable(9);
+          final rawModeOffset = fbb.writeString(object.rawMode);
+          final rawMnemonicTypeOffset = fbb.writeString(object.rawMnemonicType);
+          final rawInputsOffset = fbb.writeString(object.rawInputs);
+          final rawOutputsOffset = fbb.writeString(object.rawOutputs);
+          fbb.startTable(16);
           fbb.addInt64(0, object.id ?? 0);
           fbb.addOffset(1, internalIdOffset);
           fbb.addOffset(2, nameOffset);
-          fbb.addOffset(3, modeNameOffset);
-          fbb.addOffset(4, mnemonicTypeNameOffset);
           fbb.addOffset(5, primaryAddressOffset);
           fbb.addInt64(6, object.birthdayHeight);
           fbb.addInt64(7, object.lastSyncedHeight);
+          fbb.addOffset(8, rawModeOffset);
+          fbb.addOffset(9, rawMnemonicTypeOffset);
+          fbb.addOffset(13, rawInputsOffset);
+          fbb.addOffset(14, rawOutputsOffset);
           fbb.finish(fbb.endTable());
           return object.id ?? 0;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
           final internalIdParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 6, '');
           final nameParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 8, '');
-          final modeNameParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 10, '');
-          final mnemonicTypeNameParam =
-              const fb.StringReader(asciiOptimization: true)
-                  .vTableGet(buffer, rootOffset, 12, '');
           final primaryAddressParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 14, '');
@@ -262,16 +278,26 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
           final lastSyncedHeightParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
+          final rawModeParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 20, '');
+          final rawMnemonicTypeParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 22, '');
+          final rawInputsParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 30, '');
+          final rawOutputsParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 32, '');
           final object = Wallet(
+              id: idParam,
               internalId: internalIdParam,
               name: nameParam,
-              modeName: modeNameParam,
-              mnemonicTypeName: mnemonicTypeNameParam,
               primaryAddress: primaryAddressParam,
               birthdayHeight: birthdayHeightParam,
-              lastSyncedHeight: lastSyncedHeightParam)
-            ..id =
-                const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 4);
+              lastSyncedHeight: lastSyncedHeightParam,
+              rawMode: rawModeParam,
+              rawMnemonicType: rawMnemonicTypeParam,
+              rawInputs: rawInputsParam,
+              rawOutputs: rawOutputsParam);
 
           return object;
         })
@@ -326,23 +352,31 @@ class Wallet_ {
   static final name =
       obx.QueryStringProperty<Wallet>(_entities[1].properties[2]);
 
-  /// See [Wallet.modeName].
-  static final modeName =
-      obx.QueryStringProperty<Wallet>(_entities[1].properties[3]);
-
-  /// See [Wallet.mnemonicTypeName].
-  static final mnemonicTypeName =
-      obx.QueryStringProperty<Wallet>(_entities[1].properties[4]);
-
   /// See [Wallet.primaryAddress].
   static final primaryAddress =
-      obx.QueryStringProperty<Wallet>(_entities[1].properties[5]);
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[3]);
 
   /// See [Wallet.birthdayHeight].
   static final birthdayHeight =
-      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[6]);
+      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[4]);
 
   /// See [Wallet.lastSyncedHeight].
   static final lastSyncedHeight =
-      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[7]);
+      obx.QueryIntegerProperty<Wallet>(_entities[1].properties[5]);
+
+  /// See [Wallet.rawMode].
+  static final rawMode =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[6]);
+
+  /// See [Wallet.rawMnemonicType].
+  static final rawMnemonicType =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[7]);
+
+  /// See [Wallet.rawInputs].
+  static final rawInputs =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[8]);
+
+  /// See [Wallet.rawOutputs].
+  static final rawOutputs =
+      obx.QueryStringProperty<Wallet>(_entities[1].properties[9]);
 }

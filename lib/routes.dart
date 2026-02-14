@@ -11,11 +11,17 @@ import 'package:saketo/pages/onboarding/mnemonic_input_page.dart';
 import 'package:saketo/pages/onboarding/mode_selection_page.dart';
 import 'package:saketo/pages/onboarding/preview_configuration_page.dart';
 import 'package:saketo/pages/onboarding/welcome_page.dart';
+import 'package:saketo/pages/prerelease_disclaimer_page.dart';
 import 'package:saketo/pages/receive/main_recive_page.dart';
 import 'package:saketo/pages/settings/main_settings_page.dart';
 import 'package:saketo/wallet/wallet.dart';
 
 final routerConfig = GoRouter(routes: [
+  // TODO: Remove after pre-release phase is over
+  GoRoute(
+      path: PrereleaseDisclaimerPage.routeName,
+      builder: (context, state) => const PrereleaseDisclaimerPage()
+  ),
   GoRoute(
     path: Entrypoint.routeName,
     builder: (context, state) => const Entrypoint(),
@@ -52,7 +58,7 @@ final routerConfig = GoRouter(routes: [
         return MnemonicInputPage(extra: state.extra as Map<String, Object>);
       }),
   GoRoute(path: MainWalletPage.routeName, builder: (context, state) {
-    return MainWalletPage(theWallet: state.extra as Wallet);
+    return MainWalletPage(args: state.extra! as MainWalletPageArgs);
   }),
   GoRoute(path: MainSettingsPage.routeName, builder: (context, state) {
     return MainSettingsPage(theWallet: state.extra as Wallet);

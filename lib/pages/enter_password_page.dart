@@ -136,7 +136,7 @@ class _EnterPasswordPageState extends State<EnterPasswordPage> {
                                 } else {
                                   if (!context.mounted) return;
                                   context.go(MainWalletPage.routeName,
-                                      extra: widget.theWallet);
+                                      extra: MainWalletPageArgs(theWallet: widget.theWallet, password: password));
                                 }
                               },
                               style: ElevatedButton.styleFrom(

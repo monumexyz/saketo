@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/enter_password_page.dart';
 import 'package:saketo/pages/main_wallet_page.dart';
 import 'package:saketo/pages/onboarding/welcome_page.dart';
+import 'package:saketo/pages/prerelease_disclaimer_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
@@ -29,7 +30,7 @@ class _EntrypointState extends State<Entrypoint> {
     if (isInitialized.getBool('is_initialized') == null ||
         !isInitialized.getBool('is_initialized')!) {
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) context.go(WelcomePage.routeName);
+        if (mounted) context.go(PrereleaseDisclaimerPage.routeName);
       });
       return;
     } else {

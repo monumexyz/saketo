@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:saketo/main.dart';
 import 'package:saketo/nodes/node.dart';
 import 'package:saketo/pages/receive/main_recive_page.dart';
 import 'package:saketo/pages/settings/main_settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:saketo/wallet/chain/data_types.dart';
 
 import '../services/sync_service.dart';
 import '../wallet/wallet.dart';
-import '../wallet/wallet_modes/wallet_mode_abstract.dart';
 import 'network/main_network_page.dart';
 
 class MainWalletPage extends StatefulWidget {
-  final Wallet theWallet;
+  final MainWalletPageArgs args;
 
-  const MainWalletPage({super.key, required this.theWallet});
+  const MainWalletPage({super.key, required this.args});
 
   static const routeName = '/mainWalletPage';
 
@@ -24,13 +26,32 @@ class MainWalletPage extends StatefulWidget {
   State<MainWalletPage> createState() => _MainWalletPageState();
 }
 
-class _MainWalletPageState extends State<MainWalletPage> {
+class MainWalletPageArgs {
+  final Wallet theWallet;
+  final String password;
+
+  MainWalletPageArgs({required this.theWallet, required this.password});
+}
+
+class _MainWalletPageState extends State<MainWalletPage> with SingleTickerProviderStateMixin {
   late SyncService syncService;
+  late final AnimationController _syncTextController;
 
   @override
   void initState() {
     super.initState();
     syncService = Provider.of<SyncService>(context, listen: false);
+
+    _syncTextController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _syncTextController.dispose();
+    super.dispose();
   }
 
   @override
@@ -59,7 +80,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         GestureDetector(
                           onTap: () {
                             context.push(MainNetworkPage.routeName,
-                                extra: widget.theWallet);
+                                extra: widget.args.theWallet);
                           },
                           child: SvgPicture.asset('app_assets/bar_chart.svg',
                               colorFilter: ColorFilter.mode(
@@ -71,7 +92,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         GestureDetector(
                           onTap: () {
                             context.push(MainSettingsPage.routeName,
-                                extra: widget.theWallet);
+                                extra: widget.args.theWallet);
                           },
                           child: SvgPicture.asset('app_assets/settings.svg',
                               colorFilter: ColorFilter.mode(
@@ -104,7 +125,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         ),
                         child: Center(
                           child: SvgPicture.asset(
-                            WalletMode.fromName(widget.theWallet.modeName).icon,
+                            widget.args.theWallet.mode.icon,
                             colorFilter: ColorFilter.mode(
                                 Theme.of(context).colorScheme.tertiary,
                                 BlendMode.srcIn),
@@ -125,7 +146,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         SizedBox(
                           width: double.infinity,
                           child: Text(
-                            widget.theWallet.name,
+                            widget.args.theWallet.name,
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).colorScheme.tertiary,
@@ -183,17 +204,18 @@ class _MainWalletPageState extends State<MainWalletPage> {
                         children: [
                           Row(
                             children: [
-                              Consumer<SyncService>(
-                                builder: (context, syncService, child) {
+                              Selector<SyncService, ServiceStatus>(
+                                selector: (_, service) => service.syncStatus,
+                                builder: (context, status, child) {
                                   return Container(
                                     width: 24,
                                     height: 24,
                                     decoration: BoxDecoration(
-                                      color: syncService.syncStatus == 3
+                                      color: status == ServiceStatus.error
                                           ? const Color(0xFFC14242)
-                                          : syncService.syncStatus == 1
+                                          : status == ServiceStatus.syncing
                                           ? const Color(0xFFD69E5F)
-                                          : syncService.syncStatus == 2
+                                          : status == ServiceStatus.synced
                                           ? const Color(0xFF468053)
                                           : const Color(0xFFB9B9B9),
                                       borderRadius: BorderRadius.circular(5),
@@ -204,52 +226,76 @@ class _MainWalletPageState extends State<MainWalletPage> {
                               const SizedBox(
                                 width: 12,
                               ),
-                              Consumer<SyncService>(
-                                builder: (context, syncService, child) {
+                              Selector<SyncService, ServiceStatus>(
+                                selector: (_, service) => service.syncStatus,
+                                shouldRebuild: (previous, next) => next == ServiceStatus.error || previous != next,
+                                builder: (context, status, child) {
                                   late String syncStatusText;
-                                  switch (syncService.syncStatus) {
-                                    case 1:
-                                      syncStatusText = AppLocalizations.of(context)!
-                                          .syncing;
+
+                                  switch (status) {
+                                    case ServiceStatus.syncing:
+                                      syncStatusText = AppLocalizations.of(context)!.syncing;
                                       break;
-                                    case 2:
-                                      syncStatusText = AppLocalizations.of(context)!
-                                          .synced;
+                                    case ServiceStatus.synced:
+                                      syncStatusText = AppLocalizations.of(context)!.synced;
                                       break;
-                                    case 3:
+                                    case ServiceStatus.error:
+                                      final errorMessage = context.read<SyncService>().message;
                                       SchedulerBinding.instance.addPostFrameCallback((_) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
+                                          SnackBar(
                                               duration: const Duration(seconds: 5),
-                                                content: Text(
-                                                    AppLocalizations.of(context)!.cantSyncExplanation(syncService.message))));
+                                            content: Text(AppLocalizations.of(context)!.cantSyncExplanation(errorMessage)),
+                                          ),
+                                        );
                                       });
-                                      syncStatusText = AppLocalizations.of(context)!
-                                          .cantSync;
-                                    case 0:
-                                    default:
-                                      syncStatusText = AppLocalizations.of(context)!
-                                          .notSyncing;
+                                      syncStatusText = AppLocalizations.of(context)!.cantSync;
+                                      break;
+                                    case ServiceStatus.notSyncing:
+                                      syncStatusText = AppLocalizations.of(context)!.notSyncing;
                                       break;
                                   }
-                                  return Text(syncStatusText,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Theme.of(context).colorScheme.tertiary,
-                                        fontWeight: FontWeight.bold,
-                                      ));
+
+                                  if (status == ServiceStatus.syncing) {
+                                    return AnimatedBuilder(
+                                      animation: _syncTextController,
+                                      builder: (_, __) {
+                                        final dots = (_syncTextController.value * 4).floor() % 4;
+                                        return Text(
+                                          AppLocalizations.of(context)!.syncing + '.' * dots,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(context).colorScheme.tertiary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+
+                                  return Text(
+                                    syncStatusText,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context).colorScheme.tertiary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
                                 },
                               )
                             ],
                           ),
-                          Consumer<SyncService>(
-                            builder: (context, syncService, child) {
+                          Selector<SyncService, int>(
+                            selector: (_, service) => service.syncHeight,
+                            builder: (context, syncHeight, child) {
                               return Text(
-                                  "${syncService.syncHeight}",
+                                  syncHeight == 0
+                                      ? widget.args.theWallet.lastSyncedHeight.toString()
+                                      : syncHeight.toString(),
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.surface,
-                                  ));
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.surface,
+                              ));
                             },
                           )
                         ],
@@ -258,45 +304,45 @@ class _MainWalletPageState extends State<MainWalletPage> {
                     const SizedBox(
                       width: 6,
                     ),
-                    Consumer<SyncService>(
-                      builder: (context, syncService, child) {
+                    Selector<SyncService, ServiceStatus>(
+                      selector: (_, service) => service.syncStatus,
+                      builder: (context, status, child) {
                         late final String buttonIcon;
-                        switch (syncService.syncStatus) {
-                          case 1:
+                        switch (status) {
+                          case ServiceStatus.synced:
+                          case ServiceStatus.syncing:
                             buttonIcon = 'app_assets/pause.svg';
                             break;
-                          case 2:
-                            buttonIcon = 'app_assets/pause.svg';
-                            break;
-                          case 3:
+                          case ServiceStatus.error:
                             buttonIcon = 'app_assets/refresh_cw.svg';
                             break;
-                          case 0:
-                          default:
+                          case ServiceStatus.notSyncing:
                             buttonIcon = 'app_assets/play.svg';
                             break;
                         }
+
                         return ElevatedButton(
-                          onPressed: () {
-                            switch (syncService.syncStatus) {
-                              case 1:
-                                syncService.stopSyncing();
+                          onPressed: () async {
+                            final service = context.read<SyncService>();
+
+                            switch (status) {
+                              case ServiceStatus.synced:
+                              case ServiceStatus.syncing:
+                                service.stopSyncing();
                                 break;
-                              case 2:
-                                syncService.stopSyncing();
-                                break;
-                              case 3:
-                                syncService.startSyncing(widget.theWallet, Node.activeNode());
-                                break;
-                              case 0:
-                              default:
-                                syncService.startSyncing(widget.theWallet, Node.activeNode());
+                              case ServiceStatus.error:
+                              case ServiceStatus.notSyncing:
+                                final wallet = objectbox.store.box<Wallet>().getAll()[0];
+                                final mnemonic = await widget.args.theWallet.getMnemonic(widget.args.password);
+
+                                if (mnemonic != null) {
+                                  service.startSyncing(wallet, Node.activeNode(), mnemonic);
+                                }
                                 break;
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
                             padding: const EdgeInsets.all(12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
@@ -318,13 +364,78 @@ class _MainWalletPageState extends State<MainWalletPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              Expanded(
-                  child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(5),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Transactions",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.surface,
+                      fontWeight: FontWeight.bold,
+                    )
                 ),
-              )),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Selector<SyncService, List<Transaction>>(
+                  selector: (_, service) => service.transactions,
+                  builder: (context, transactions, child) {
+                    return ListView.builder(
+                      itemCount: transactions.length,
+                      itemBuilder: (context, index) {
+                        final tx = transactions[index];
+
+                        final totalInputs = tx.inputs.fold(0, (sum, input) => sum + input.amount);
+                        final totalOutputs = tx.outputs.fold(0, (sum, output) => sum + output.amount);
+
+                        final bool isIncoming = tx.direction == TxDirection.incoming;
+
+                        double amount;
+                        if (isIncoming) {
+                          amount = totalOutputs / 1e12;
+                        } else {
+                          amount = (totalInputs - totalOutputs) / 1e12;
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                isIncoming ? Icons.south_west : Icons.north_east,
+                                color: isIncoming ? Colors.green : Colors.orange,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  DateFormat('dd MMM yy').format(tx.timestamp),
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.tertiary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                "${isIncoming ? '+' : '-'} ${amount.toStringAsFixed(4)} XMR",
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
               const SizedBox(height: 12),
               SizedBox(
                   width: double.infinity,
@@ -346,7 +457,7 @@ class _MainWalletPageState extends State<MainWalletPage> {
                           ),
                           onPressed: () {
                             context.push(MainReceivePage.routeName,
-                                extra: widget.theWallet);
+                                extra: widget.args.theWallet);
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,

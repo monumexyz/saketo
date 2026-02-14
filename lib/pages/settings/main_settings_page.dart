@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/main.dart';
 import 'package:saketo/pages/entrypoint.dart';
+import 'package:saketo/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../wallet/wallet.dart';
@@ -45,7 +46,33 @@ class MainSettingsPage extends StatelessWidget {
                       fontSize: 14),
                 ),
               ),
-            )
+            ),
+            GestureDetector(
+              onTap: () {
+                SyncService().stopSyncing();
+                theWallet.lastSyncedHeight = theWallet.birthdayHeight;
+                theWallet.rawInputs = "[]";
+                theWallet.rawOutputs = "[]";
+                objectbox.store.box<Wallet>().put(theWallet);
+                if (context.mounted) context.pop();
+              },
+              child: Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                width: double.infinity,
+                height: 60,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderRadius: BorderRadius.circular(5)),
+                child: Text(
+                  "Reset Wallet Sync Data",
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      fontSize: 14),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -1,6 +1,6 @@
-import 'legacy/legacy_mnemonic_type.dart';
-import 'mymonero/mymonero_mnemonic_type.dart';
-import 'polyseed/polyseed_mnemonic_type.dart';
+import 'legacy_mnemonic_type.dart';
+import 'mymonero_mnemonic_type.dart';
+import 'polyseed_mnemonic_type.dart';
 
 abstract class MnemonicType {
   String get name;
@@ -12,13 +12,13 @@ abstract class MnemonicType {
   factory MnemonicType.legacy() => LegacyMnemonicType();
   factory MnemonicType.mymonero() => MyMoneroMnemonicType();
 
-  factory MnemonicType.fromName(String name) {
-    switch (name) {
-      case 'Polyseed':
+  factory MnemonicType.fromString(String name) {
+    switch (name.toLowerCase()) {
+      case 'polyseed':
         return MnemonicType.polyseed();
-      case 'Legacy':
+      case 'legacy':
         return MnemonicType.legacy();
-      case 'MyMonero':
+      case 'mymonero':
         return MnemonicType.mymonero();
       default:
         throw Exception('Unknown mnemonic type: $name');

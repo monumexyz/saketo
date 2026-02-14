@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../wallet/wallet.dart';
-import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
 
 class MainReceivePage extends StatelessWidget {
   final Wallet theWallet;
@@ -80,7 +79,7 @@ class MainReceivePage extends StatelessWidget {
                             ),
                             child: Center(
                               child: SvgPicture.asset(
-                                WalletMode.fromName(theWallet.modeName).icon,
+                                theWallet.mode.icon,
                                 colorFilter: ColorFilter.mode(
                                     Theme.of(context).colorScheme.tertiary,
                                     BlendMode.srcIn),

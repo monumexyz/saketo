@@ -9,6 +9,7 @@ Prerequisites:
 - [Flutter and Dart SDK](https://flutter.dev/docs/get-started/install)
 - [Android Studio](https://developer.android.com/studio)
 - [NDK](https://developer.android.com/ndk/guides)
+- OpenSSL
 
 Steps:
 1 - Fetch libsaketo

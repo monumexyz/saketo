@@ -1,4 +1,4 @@
-import '../wallet_mode_abstract.dart';
+import 'wallet_mode_abstract.dart';
 
 class AdvancedMode implements WalletMode {
   @override

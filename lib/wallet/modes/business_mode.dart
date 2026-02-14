@@ -1,4 +1,4 @@
-import 'package:saketo/wallet/wallet_modes/wallet_mode_abstract.dart';
+import 'package:saketo/wallet/modes/wallet_mode_abstract.dart';
 
 class BusinessMode implements WalletMode {
   @override

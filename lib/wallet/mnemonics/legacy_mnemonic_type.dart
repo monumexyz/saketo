@@ -1,5 +1,5 @@
-import '../../../../rust_ffi/rust_ffi.dart';
-import '../mnemonic_type.dart';
+import '../../ffi/ffi.dart';
+import 'mnemonic_type.dart';
 
 class LegacyMnemonicType implements MnemonicType {
   @override
@@ -11,7 +11,6 @@ class LegacyMnemonicType implements MnemonicType {
   @override
   List<String> generateMnemonic() => generateSeedString(MnemonicType.legacy()).split(' ');
 
-  // TODO: Implement this method when the Legacy mnemonic validation is implemented
   @override
   (bool, String) isValidMnemonic(String mnemonic, String languageCode) => checkIsValidMnemonic(MnemonicType.legacy(), mnemonic, languageCode);
 }

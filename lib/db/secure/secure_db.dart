@@ -1,7 +1,7 @@
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
-import 'package:saketo/rust_ffi/rust_ffi.dart';
+
+import '../../ffi/ffi.dart';
 
 class SecureDB {
   static Future<String?> getValue(String key, String password) async {

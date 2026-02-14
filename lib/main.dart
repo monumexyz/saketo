@@ -67,7 +67,7 @@ class Saketo extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en'), Locale('tr')],
+      supportedLocales: const [Locale('en'), /* Locale('tr') */],
       routerConfig: routerConfig,
     );
   }

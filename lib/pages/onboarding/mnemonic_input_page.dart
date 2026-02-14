@@ -4,15 +4,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/enter_password_page.dart';
 import 'package:saketo/pages/main_wallet_page.dart';
-import 'package:saketo/wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
+import 'package:saketo/wallet/mnemonics/polyseed_mnemonic_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../ffi/ffi.dart';
 import '../../main.dart';
-import '../../rust_ffi/rust_ffi.dart';
 import '../../wallet/mnemonics/mnemonic_type.dart';
+import '../../wallet/modes/wallet_mode_abstract.dart';
 import '../../wallet/wallet.dart';
-import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
 
 class MnemonicInputPage extends StatefulWidget {
   final Map<String, Object> extra;
@@ -370,11 +370,11 @@ class _MnemonicInputPageState extends State<MnemonicInputPage> {
                                 } else {
                                   birthdayHeight = widget.extra['birthdayHeight'] as int;
                                 }
-                                final wallet = Wallet(
+                                final wallet = Wallet.create(
                                   internalId: const Uuid().v4(),
                                   name: widget.extra['walletName'] as String,
-                                  modeName: (widget.extra['walletMode'] as WalletMode).name,
-                                  mnemonicTypeName: chosenMnemonicType.name,
+                                  mode: (widget.extra['walletMode'] as WalletMode),
+                                  mnemonicType: chosenMnemonicType,
                                   primaryAddress: primaryAddress,
                                   birthdayHeight: birthdayHeight,
                                   lastSyncedHeight: birthdayHeight,

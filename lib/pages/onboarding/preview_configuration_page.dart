@@ -4,11 +4,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:saketo/pages/onboarding/create_password_page.dart';
-import 'package:saketo/wallet/mnemonics/polyseed/polyseed_mnemonic_type.dart';
-import 'package:saketo/wallet/wallet_modes/basic/basic_mode.dart';
-
+import 'package:saketo/wallet/mnemonics/polyseed_mnemonic_type.dart';
 import '../../wallet/mnemonics/mnemonic_type.dart';
-import '../../wallet/wallet_modes/wallet_mode_abstract.dart';
+import '../../wallet/modes/basic_mode.dart';
+import '../../wallet/modes/wallet_mode_abstract.dart';
 
 class PreviewConfigurationPage extends StatefulWidget {
   final Map<String, Object> extra;
