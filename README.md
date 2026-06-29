@@ -2,7 +2,7 @@
 
 First mobile Monero wallet to use Rust under the hood, built upon [libsaketo](https://github.com/monumexyz/libsaketo)
 
-This project is still Work-In-Progress! You may star the repo to learn the news about it.
+**This project is still Work-In-Progress! You may star the repo to learn the news about it.**
 
 ## Building
 
